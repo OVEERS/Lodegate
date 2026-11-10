@@ -1,3 +1,5 @@
+import { useI18n } from '../i18n/I18nProvider'
+
 export type Page = 'tunnels' | 'servers' | 'settings'
 
 interface SidebarProps {
@@ -5,13 +7,15 @@ interface SidebarProps {
   onChange: (page: Page) => void
 }
 
-const items: { id: Page; label: string; icon: string }[] = [
-  { id: 'tunnels', label: 'Туннели', icon: '⇄' },
-  { id: 'servers', label: 'Игровые серверы', icon: '▦' },
-  { id: 'settings', label: 'Настройки', icon: '⚙' }
+const items: { id: Page; labelKey: string; icon: string }[] = [
+  { id: 'tunnels', labelKey: 'nav.tunnels', icon: '⇄' },
+  { id: 'servers', labelKey: 'nav.servers', icon: '▦' },
+  { id: 'settings', labelKey: 'nav.settings', icon: '⚙' }
 ]
 
 export default function Sidebar({ current, onChange }: SidebarProps) {
+  const { t } = useI18n()
+
   return (
     <aside className="flex h-full w-60 flex-col border-r border-line bg-panel">
       <div className="flex items-center gap-3 px-5 py-5">
@@ -26,6 +30,7 @@ export default function Sidebar({ current, onChange }: SidebarProps) {
 
       <nav className="flex flex-1 flex-col gap-1 px-3 pt-2">
         {items.map((item) => {
+
           const active = item.id === current
           return (
             <button
@@ -39,14 +44,14 @@ export default function Sidebar({ current, onChange }: SidebarProps) {
               }
             >
               <span className="w-5 text-center text-base">{item.icon}</span>
-              {item.label}
+              {t(item.labelKey)}
             </button>
           )
         })}
       </nav>
 
       <div className="border-t border-line px-5 py-4 text-xs text-muted">
-        Неофициальный продукт. Не связан с Mojang и Microsoft.
+        {t('app.disclaimer')}
       </div>
     </aside>
   )

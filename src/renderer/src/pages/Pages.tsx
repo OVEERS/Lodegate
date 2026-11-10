@@ -1,44 +1,27 @@
+import { useI18n } from '../i18n/I18nProvider'
+
 interface PlaceholderProps {
-  title: string
-  description: string
+  titleKey: string
+  descriptionKey: string
 }
 
-function Placeholder({ title, description }: PlaceholderProps) {
+function Placeholder({ titleKey, descriptionKey }: PlaceholderProps) {
+  const { t } = useI18n()
   return (
     <div className="flex h-full flex-col p-8">
-      <h1 className="text-2xl font-semibold">{title}</h1>
-      <p className="mt-2 text-sm text-muted">{description}</p>
+      <h1 className="text-2xl font-semibold">{t(titleKey)}</h1>
+      <p className="mt-2 text-sm text-muted">{t(descriptionKey)}</p>
       <div className="mt-8 flex flex-1 items-center justify-center rounded-xl border border-dashed border-line text-muted">
-        Здесь скоро что-то появится
+        {t('placeholder.soon')}
       </div>
     </div>
   )
 }
 
 export function TunnelsPage() {
-  return (
-    <Placeholder
-      title="Туннели"
-      description="Создание и управление туннелями для подключения друзей."
-    />
-  )
+  return <Placeholder titleKey="tunnels.title" descriptionKey="tunnels.description" />
 }
 
 export function ServersPage() {
-  return (
-    <Placeholder
-      title="Игровые серверы"
-      description="Создание, импорт и управление Minecraft-серверами."
-    />
-
-  )
-}
-
-export function SettingsPage() {
-  return (
-    <Placeholder
-      title="Настройки"
-      description="Язык, уведомления и поведение приложения."
-    />
-  )
+  return <Placeholder titleKey="servers.title" descriptionKey="servers.description" />
 }

@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import Sidebar from './components/Sidebar'
 import type { Page } from './components/Sidebar'
-import { TunnelsPage, ServersPage, SettingsPage } from './pages/Pages'
+import { TunnelsPage, ServersPage } from './pages/Pages'
+import SettingsPage from './pages/SettingsPage'
 
 export default function App() {
   const [page, setPage] = useState<Page>('servers')
