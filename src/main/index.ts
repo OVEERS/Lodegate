@@ -1,8 +1,10 @@
 import { app, shell, BrowserWindow, ipcMain } from 'electron'
 import { join } from 'path'
+import { registerServersIpc } from './servers'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 import { registerSettingsIpc } from './settings'
+import { registerVersionsIpc } from './versions'
 
 function createWindow(): void {
   // Create the browser window.
@@ -41,6 +43,8 @@ function createWindow(): void {
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(() => {
   registerSettingsIpc()
+  registerServersIpc()
+  registerVersionsIpc()
   // Set app user model id for windows
   electronApp.setAppUserModelId('com.electron')
 

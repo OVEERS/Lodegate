@@ -14,9 +14,13 @@ export const ru = {
     title: 'Туннели',
     description: 'Создание и управление туннелями для подключения друзей.'
   },
-  servers: {
+   servers: {
     title: 'Игровые серверы',
-    description: 'Создание, импорт и управление Minecraft-серверами.'
+    description: 'Создание, импорт и управление Minecraft-серверами.',
+    create: 'Создать сервер',
+    empty: 'Серверов пока нет',
+    emptyHint: 'Нажмите «Создать сервер», чтобы начать.',
+    remove: 'Удалить'
   },
   settings: {
     title: 'Настройки',

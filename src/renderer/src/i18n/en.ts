@@ -18,7 +18,11 @@ export const en: Dictionary = {
   },
   servers: {
     title: 'Game servers',
-    description: 'Create, import and manage Minecraft servers.'
+    description: 'Create, import and manage Minecraft servers.',
+    create: 'Create server',
+    empty: 'No servers yet',
+    emptyHint: 'Click "Create server" to get started.',
+    remove: 'Remove'
   },
   settings: {
     title: 'Settings',
