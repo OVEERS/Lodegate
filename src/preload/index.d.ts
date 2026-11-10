@@ -29,8 +29,9 @@ declare global {
         list: () => Promise<ServerConfig[]>
         add: (data: Omit<ServerConfig, 'id' | 'createdAt'>) => Promise<ServerConfig>
         remove: (id: string) => Promise<ServerConfig[]>
+        defaultDir: () => Promise<string>
+        pickFolder: () => Promise<string | null>
       }
-
       versions: {
         list: (core: 'paper' | 'vanilla') => Promise<string[]>
         jar: (

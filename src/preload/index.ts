@@ -9,7 +9,9 @@ const api = {
   servers: {
     list: () => ipcRenderer.invoke('servers:list'),
     add: (data: object) => ipcRenderer.invoke('servers:add', data),
-    remove: (id: string) => ipcRenderer.invoke('servers:remove', id)
+    remove: (id: string) => ipcRenderer.invoke('servers:remove', id),
+    defaultDir: () => ipcRenderer.invoke('servers:defaultDir'),
+    pickFolder: () => ipcRenderer.invoke('servers:pickFolder')
   },
   versions: {
     list: (core: string) => ipcRenderer.invoke('versions:list', core),
@@ -28,7 +30,7 @@ if (process.contextIsolated) {
 } else {
   // @ts-ignore (define in dts)
   window.electron = electronAPI
+
   // @ts-ignore (define in dts)
   window.api = api
-
 }

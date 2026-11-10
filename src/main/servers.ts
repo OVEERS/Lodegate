@@ -1,4 +1,4 @@
-import { app, ipcMain } from 'electron'
+import { app, ipcMain, dialog, BrowserWindow } from 'electron'
 import { join } from 'path'
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs'
 import { randomUUID } from 'crypto'
@@ -41,5 +41,22 @@ export function registerServersIpc(): void {
     const list = loadServers().filter((s) => s.id !== id)
     saveServers(list)
     return list
+  })
+
+  // Папка по умолчанию: Документы\Lodegate\servers
+  ipcMain.handle('servers:defaultDir', () => {
+    return join(app.getPath('documents'), 'Lodegate', 'servers')
+  })
+
+  // Окно выбора папки
+  ipcMain.handle('servers:pickFolder', async () => {
+    const win = BrowserWindow.getFocusedWindow()
+    const options = {
+      properties: ['openDirectory', 'createDirectory'] as ('openDirectory' | 'createDirectory')[]
+    }
+    const result = win
+      ? await dialog.showOpenDialog(win, options)
+      : await dialog.showOpenDialog(options)
+    return result.canceled ? null : result.filePaths[0]
   })
 }

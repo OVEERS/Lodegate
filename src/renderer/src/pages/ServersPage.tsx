@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react'
 import { useI18n } from '../i18n/I18nProvider'
+import CreateServerWizard from '../components/CreateServerWizard'
 
 export default function ServersPage() {
   const { t } = useI18n()
   const [servers, setServers] = useState<ServerConfig[]>([])
+  const [wizardOpen, setWizardOpen] = useState(false)
 
   async function reload() {
     setServers(await window.api.servers.list())
@@ -12,33 +14,6 @@ export default function ServersPage() {
   useEffect(() => {
     reload()
   }, [])
-
-  // Временно: создаёт тестовую запись, настоящий мастер будет в шаге 2.3
-  async function addTest() {
-    await window.api.servers.add({
-      name: 'Test server ' + (servers.length + 1),
-      core: 'paper',
-      mcVersion: '1.21.4',
-      dir: 'D:\\servers\\test',
-      minRamMb: 1024,
-      maxRamMb: 4096
-    })
-    reload()
-  }
-
-  // Временно: проверка запросов к API версий
-  async function testVersions() {
-    try {
-      const list = await window.api.versions.list('paper')
-      console.log('Paper версии (первые 5):', list.slice(0, 5))
-      const jar = await window.api.versions.jar('paper', list[0])
-      console.log('Jar для', list[0], jar)
-      const java = await window.api.versions.java(list[0])
-      console.log('Нужна Java', java)
-    } catch (e) {
-      console.error('Ошибка:', e)
-    }
-  }
 
   async function remove(id: string) {
     setServers(await window.api.servers.remove(id))
@@ -51,20 +26,13 @@ export default function ServersPage() {
           <h1 className="text-2xl font-semibold">{t('servers.title')}</h1>
           <p className="mt-2 text-sm text-muted">{t('servers.description')}</p>
         </div>
-        <div className="flex">
-          <button
-            onClick={testVersions}
-            className="mr-2 rounded-lg border border-line px-4 py-2 text-sm text-muted hover:text-text"
-          >
-            Test API
-          </button>
-          <button
-            onClick={addTest}
-            className="rounded-lg bg-teal px-4 py-2 text-sm font-medium text-bg hover:opacity-90"
-          >
-            {t('servers.create')}
-          </button>
-        </div>
+        <button
+          onClick={() => setWizardOpen(true)}
+          className="rounded-lg bg-teal px-4 py-2 text-sm font-medium text-bg hover:opacity-90"
+        >
+
+          {t('servers.create')}
+        </button>
       </div>
 
       {servers.length === 0 ? (
@@ -82,8 +50,9 @@ export default function ServersPage() {
               <div>
                 <div className="text-sm font-medium">{s.name}</div>
                 <div className="mt-1 text-xs text-muted">
-                  {s.core} · {s.mcVersion} · {s.maxRamMb} MB
+                  {s.core} · {s.mcVersion} · {s.maxRamMb / 1024} GB
                 </div>
+                <div className="mt-0.5 text-xs text-muted">{s.dir}</div>
               </div>
               <button
                 onClick={() => remove(s.id)}
@@ -94,6 +63,17 @@ export default function ServersPage() {
             </div>
           ))}
         </div>
+
+      )}
+
+      {wizardOpen && (
+        <CreateServerWizard
+          onClose={() => setWizardOpen(false)}
+          onCreated={() => {
+            setWizardOpen(false)
+            reload()
+          }}
+        />
       )}
     </div>
   )
