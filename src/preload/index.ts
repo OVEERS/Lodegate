@@ -30,14 +30,15 @@ const api = {
   },
   runner: {
     start: (id: string) => ipcRenderer.invoke('server:start', id),
-
     stop: (id: string) => ipcRenderer.invoke('server:stop', id),
     command: (id: string, command: string) => ipcRenderer.invoke('server:command', id, command),
     state: (id: string) => ipcRenderer.invoke('server:state', id),
     eulaStatus: (id: string) => ipcRenderer.invoke('server:eulaStatus', id),
     acceptEula: (id: string) => ipcRenderer.invoke('server:acceptEula', id),
     onLog: (cb: (d: never) => void) => subscribe('server:log', cb),
-    onStatus: (cb: (d: never) => void) => subscribe('server:status', cb)
+    onStatus: (cb: (d: never) => void) => subscribe('server:status', cb),
+    onPlayers: (cb: (d: never) => void) => subscribe('server:players', cb),
+    onStats: (cb: (d: never) => void) => subscribe('server:stats', cb)
   }
 }
 

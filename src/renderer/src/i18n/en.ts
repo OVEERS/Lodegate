@@ -22,13 +22,13 @@ export const en: Dictionary = {
     create: 'Create server',
     empty: 'No servers yet',
     emptyHint: 'Click "Create server" to get started.',
-    installingJava: 'Installing Java (download and unpack, may take a minute)…',
     remove: 'Remove',
     install: 'Install',
     installed: 'Installed',
     notInstalled: 'Not installed',
     preparing: 'Preparing…',
     downloading: 'Downloading core',
+    installingJava: 'Installing Java (download and unpack, may take a minute)…',
     installError: 'Install error'
   },
   wizard: {
@@ -58,17 +58,7 @@ export const en: Dictionary = {
     infoError: 'Could not get core information.',
     note: 'The core will be downloaded automatically after creation.'
   },
-  settings: {
-    title: 'Settings',
-    description: 'Language, notifications and app behavior.',
-    language: 'Interface language',
-    languageDesc: 'Language of app texts and notifications.',
-    tray: 'Minimize to tray on close',
-    trayDesc: 'Servers and tunnels keep running in the background.',
-    telemetry: 'Anonymous statistics',
-    telemetryDesc: 'Off by default. Enable only if you want to help the project.'
-  },
-    console: {
+  console: {
     open: 'Open',
     back: 'Back',
     start: 'Start',
@@ -88,4 +78,37 @@ export const en: Dictionary = {
     eulaAccept: 'Accept and continue',
     startError: 'Could not start'
   },
+  tabs: {
+    overview: 'Overview',
+    players: 'Players',
+    plugins: 'Plugins',
+    world: 'World',
+    files: 'Files',
+    launch: 'Launch options',
+    scheduler: 'Scheduler',
+    settings: 'Settings',
+    soon: 'This tab will appear in the next steps.'
+  },
+  overview: {
+    ram: 'RAM',
+    cpu: 'CPU',
+    players: 'Players',
+    java: 'Java',
+    quick: 'Quick commands',
+    save: 'Save world',
+    day: 'Day',
+    night: 'Night',
+    list: 'Player list',
+    plugins: 'Plugins'
+  },
+  settings: {
+    title: 'Settings',
+    description: 'Language, notifications and app behavior.',
+    language: 'Interface language',
+    languageDesc: 'Language of app texts and notifications.',
+    tray: 'Minimize to tray on close',
+    trayDesc: 'Servers and tunnels keep running in the background.',
+    telemetry: 'Anonymous statistics',
+    telemetryDesc: 'Off by default. Enable only if you want to help the project.'
+  }
 }

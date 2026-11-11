@@ -6,6 +6,19 @@ interface Props {
   onBack: () => void
 }
 
+type Tab = 'overview' | 'players' | 'plugins' | 'world' | 'files' | 'launch' | 'scheduler' | 'settings'
+
+const TABS: Tab[] = [
+  'overview',
+  'players',
+  'plugins',
+  'world',
+  'files',
+  'launch',
+  'scheduler',
+  'settings'
+]
+
 const statusColor: Record<ServerStatus, string> = {
   stopped: 'bg-muted',
   installing: 'bg-amber',
@@ -14,47 +27,76 @@ const statusColor: Record<ServerStatus, string> = {
   stopping: 'bg-amber'
 }
 
+function StatCard({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-xl border border-line bg-panel p-4">
+
+      <div className="text-xs text-muted">{label}</div>
+      <div className="mt-2 text-xl font-semibold">{value}</div>
+    </div>
+  )
+}
+
 export default function ServerView({ server, onBack }: Props) {
   const { t } = useI18n()
+  const [tab, setTab] = useState<Tab>('overview')
   const [status, setStatus] = useState<ServerStatus>('stopped')
   const [lines, setLines] = useState<string[]>([])
+  const [players, setPlayers] = useState<string[]>([])
+  const [stats, setStats] = useState<ServerStats>({ ramMb: 0, cpu: 0 })
+  const [maxPlayers, setMaxPlayers] = useState(20)
   const [command, setCommand] = useState('')
   const [error, setError] = useState('')
   const [eulaOpen, setEulaOpen] = useState(false)
   const [eulaChecked, setEulaChecked] = useState(false)
   const logRef = useRef<HTMLDivElement>(null)
 
-  // Подгружаем текущее состояние и подписываемся на события
   useEffect(() => {
     window.api.runner.state(server.id).then((s) => {
       setStatus(s.status)
       setLines(s.log)
+      setPlayers(s.players)
+      setStats(s.stats)
+      setMaxPlayers(s.maxPlayers)
     })
-
 
     const offLog = window.api.runner.onLog((d) => {
       if (d.id !== server.id) return
       setLines((prev) => [...prev.slice(-999), d.line])
+
     })
     const offStatus = window.api.runner.onStatus((d) => {
-      if (d.id === server.id) setStatus(d.status)
+      if (d.id !== server.id) return
+      setStatus(d.status)
+      // После запуска файл server.properties уже создан, перечитываем лимит игроков
+      if (d.status === 'running') {
+        window.api.runner.state(server.id).then((s) => setMaxPlayers(s.maxPlayers))
+      }
+    })
+    const offPlayers = window.api.runner.onPlayers((d) => {
+      if (d.id === server.id) setPlayers(d.players)
+    })
+    const offStats = window.api.runner.onStats((d) => {
+      if (d.id === server.id) setStats({ ramMb: d.ramMb, cpu: d.cpu })
     })
     return () => {
       offLog()
       offStatus()
+      offPlayers()
+      offStats()
     }
   }, [server.id])
 
-  // Прокрутка консоли вниз при новых строках
   useEffect(() => {
     const el = logRef.current
     if (el) el.scrollTop = el.scrollHeight
-  }, [lines])
+  }, [lines, tab])
 
   async function start() {
     setError('')
     const accepted = await window.api.runner.eulaStatus(server.id)
     if (!accepted) {
+
       setEulaChecked(false)
       setEulaOpen(true)
       return
@@ -63,7 +105,6 @@ export default function ServerView({ server, onBack }: Props) {
     if (!res.ok) setError(res.error ?? 'error')
   }
 
-
   async function acceptEula() {
     await window.api.runner.acceptEula(server.id)
     setEulaOpen(false)
@@ -71,15 +112,29 @@ export default function ServerView({ server, onBack }: Props) {
     if (!res.ok) setError(res.error ?? 'error')
   }
 
-  async function sendCommand() {
-    const text = command.trim()
-    if (!text) return
-    setCommand('')
-    await window.api.runner.command(server.id, text)
+  async function sendCommand(text?: string) {
+    const value = (text ?? command).trim()
+    if (!value) return
+    if (text === undefined) setCommand('')
+    await window.api.runner.command(server.id, value)
   }
 
   const canStart = status === 'stopped'
   const canStop = status === 'starting' || status === 'running'
+  const live = status !== 'stopped'
+
+  const quick: { label: string; cmd: string }[] = [
+    { label: t('overview.save'), cmd: 'save-all' },
+    { label: t('overview.day'), cmd: 'time set day' },
+    { label: t('overview.night'), cmd: 'time set night' },
+    { label: t('overview.list'), cmd: 'list' }
+  ]
+
+  if (server.core === 'paper') quick.push({ label: t('overview.plugins'), cmd: 'plugins' })
+
+  const ramText = live
+    ? `${(stats.ramMb / 1024).toFixed(1)} GB / ${server.maxRamMb / 1024} GB`
+    : `0 GB / ${server.maxRamMb / 1024} GB`
 
   return (
     <div className="flex h-full flex-col p-8">
@@ -96,7 +151,6 @@ export default function ServerView({ server, onBack }: Props) {
           </div>
         </div>
         <div className="flex gap-2">
-
           <button
             onClick={start}
             disabled={!canStart}
@@ -108,10 +162,29 @@ export default function ServerView({ server, onBack }: Props) {
             onClick={() => window.api.runner.stop(server.id)}
             disabled={!canStop}
             className="rounded-lg border border-line px-4 py-2 text-sm text-text disabled:opacity-40"
+
           >
             {t('console.stop')}
           </button>
         </div>
+      </div>
+
+      {/* Панель вкладок */}
+      <div className="mt-6 flex gap-1 overflow-x-auto border-b border-line">
+        {TABS.map((id) => (
+          <button
+            key={id}
+            onClick={() => setTab(id)}
+            className={
+              'whitespace-nowrap border-b-2 px-3 py-2 text-sm transition-colors ' +
+              (tab === id
+                ? 'border-teal text-teal'
+                : 'border-transparent text-muted hover:text-text')
+            }
+          >
+            {t('tabs.' + id)}
+          </button>
+        ))}
       </div>
 
       {error && (
@@ -120,49 +193,83 @@ export default function ServerView({ server, onBack }: Props) {
         </div>
       )}
 
-      <div className="mt-6 flex min-h-0 flex-1 flex-col rounded-xl border border-line bg-panel">
-        <div className="border-b border-line px-4 py-2 text-xs text-muted">
-          {t('console.title')}
-        </div>
-        <div
-          ref={logRef}
-          className="min-h-0 flex-1 select-text overflow-y-auto px-4 py-3 font-mono text-xs leading-5"
-        >
-          {lines.map((line, i) => (
+      {tab !== 'overview' && (
+        <div className="mt-6 flex flex-1 items-center justify-center rounded-xl border border-dashed border-line text-sm text-muted">
 
-            <div
-              key={i}
-              className={
-                /WARN/.test(line)
-                  ? 'text-amber'
-                  : /ERROR|Exception/.test(line)
-                    ? 'text-red-400'
-                    : 'text-text'
-              }
-            >
-              {line}
+          {t('tabs.soon')}
+        </div>
+      )}
+
+      {tab === 'overview' && (
+        <div className="mt-6 flex min-h-0 flex-1 flex-col gap-4">
+          <div className="grid grid-cols-4 gap-3">
+            <StatCard label={t('overview.ram')} value={ramText} />
+            <StatCard label={t('overview.cpu')} value={`${live ? stats.cpu.toFixed(1) : '0.0'}%`} />
+            <StatCard label={t('overview.players')} value={`${players.length} / ${maxPlayers}`} />
+            <StatCard
+              label={t('overview.java')}
+              value={server.javaMajor ? `Java ${server.javaMajor}` : '—'}
+            />
+          </div>
+
+          <div className="flex min-h-0 flex-1 flex-col rounded-xl border border-line bg-panel">
+            <div className="border-b border-line px-4 py-2 text-xs text-muted">
+              {t('console.title')}
             </div>
-          ))}
-        </div>
-        <div className="flex gap-2 border-t border-line p-3">
-          <input
-            value={command}
-            onChange={(e) => setCommand(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && sendCommand()}
-            disabled={status === 'stopped'}
-            placeholder={t('console.commandPlaceholder')}
-            className="flex-1 rounded-lg border border-line bg-panel-2 px-3 py-2 font-mono text-xs outline-none focus:border-teal disabled:opacity-40"
-          />
-          <button
-            onClick={sendCommand}
-            disabled={status === 'stopped'}
-            className="rounded-lg border border-line px-4 py-2 text-xs disabled:opacity-40"
-          >
-            {t('console.send')}
-          </button>
-        </div>
-      </div>
+            <div
+              ref={logRef}
+              className="min-h-0 flex-1 select-text overflow-y-auto px-4 py-3 font-mono text-xs leading-5"
+            >
+              {lines.map((line, i) => (
+                <div
+                  key={i}
+                  className={
+                    /WARN/.test(line)
+                      ? 'text-amber'
+                      : /ERROR|Exception/.test(line)
+                        ? 'text-red-400'
 
+                        : 'text-text'
+                  }
+                >
+                  {line}
+                </div>
+              ))}
+            </div>
+            <div className="flex gap-2 border-t border-line p-3">
+              <input
+                value={command}
+                onChange={(e) => setCommand(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && sendCommand()}
+                disabled={!live}
+                placeholder={t('console.commandPlaceholder')}
+                className="flex-1 rounded-lg border border-line bg-panel-2 px-3 py-2 font-mono text-xs outline-none focus:border-teal disabled:opacity-40"
+              />
+              <button
+                onClick={() => sendCommand()}
+                disabled={!live}
+                className="rounded-lg border border-line px-4 py-2 text-xs disabled:opacity-40"
+              >
+                {t('console.send')}
+              </button>
+            </div>
+            <div className="flex flex-wrap items-center gap-2 border-t border-line px-3 py-3">
+              <span className="text-xs text-muted">{t('overview.quick')}:</span>
+              {quick.map((q) => (
+                <button
+                  key={q.cmd}
+                  onClick={() => sendCommand(q.cmd)}
+                  disabled={status !== 'running'}
+                  className="rounded-full border border-line bg-panel-2 px-3 py-1 text-xs hover:border-teal disabled:opacity-40"
+
+                >
+                  {q.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
 
       {eulaOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-6">
@@ -187,6 +294,7 @@ export default function ServerView({ server, onBack }: Props) {
               {t('console.eulaCheck')}
             </label>
             <div className="mt-6 flex justify-end gap-2">
+
               <button
                 onClick={() => setEulaOpen(false)}
                 className="rounded-lg border border-line px-4 py-2 text-sm text-muted"
@@ -195,7 +303,6 @@ export default function ServerView({ server, onBack }: Props) {
               </button>
               <button
                 onClick={acceptEula}
-
                 disabled={!eulaChecked}
                 className="rounded-lg bg-teal px-4 py-2 text-sm font-medium text-bg disabled:opacity-40"
               >

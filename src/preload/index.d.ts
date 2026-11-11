@@ -31,6 +31,10 @@ declare global {
     message?: string
   }
 
+  interface ServerStats {
+    ramMb: number
+    cpu: number
+  }
 
   interface Window {
     electron: ElectronAPI
@@ -63,13 +67,20 @@ declare global {
       runner: {
         start: (id: string) => Promise<{ ok: boolean; error?: string }>
         stop: (id: string) => Promise<void>
-
         command: (id: string, command: string) => Promise<void>
-        state: (id: string) => Promise<{ status: ServerStatus; log: string[] }>
+        state: (id: string) => Promise<{
+          status: ServerStatus
+          log: string[]
+          players: string[]
+          stats: ServerStats
+          maxPlayers: number
+        }>
         eulaStatus: (id: string) => Promise<boolean>
         acceptEula: (id: string) => Promise<boolean>
         onLog: (callback: (d: { id: string; line: string }) => void) => () => void
         onStatus: (callback: (d: { id: string; status: ServerStatus }) => void) => () => void
+        onPlayers: (callback: (d: { id: string; players: string[] }) => void) => () => void
+        onStats: (callback: (d: { id: string } & ServerStats) => void) => () => void
       }
     }
   }
