@@ -6,6 +6,8 @@ import icon from '../../resources/icon.png?asset'
 import { registerSettingsIpc } from './settings'
 import { registerVersionsIpc } from './versions'
 import { registerInstallerIpc } from './installer'
+import { registerJavaIpc } from './java'
+
 
 function createWindow(): void {
   // Create the browser window.
@@ -39,6 +41,8 @@ function createWindow(): void {
   }
 }
 
+app.setName('Lodegate')
+app.setPath('userData', join(app.getPath('appData'), 'Lodegate'))
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
@@ -47,6 +51,7 @@ app.whenReady().then(() => {
   registerServersIpc()
   registerVersionsIpc()
   registerInstallerIpc()
+  registerJavaIpc()
   // Set app user model id for windows
   electronApp.setAppUserModelId('com.electron')
 

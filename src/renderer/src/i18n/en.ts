@@ -22,6 +22,7 @@ export const en: Dictionary = {
     create: 'Create server',
     empty: 'No servers yet',
     emptyHint: 'Click "Create server" to get started.',
+    installingJava: 'Installing Java (download and unpack, may take a minute)…',
     remove: 'Remove',
     install: 'Install',
     installed: 'Installed',

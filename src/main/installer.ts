@@ -3,8 +3,9 @@ import { join } from 'path'
 import { createWriteStream, existsSync, mkdirSync, renameSync, unlinkSync } from 'fs'
 import { Readable } from 'stream'
 import { pipeline } from 'stream/promises'
-import { getJarInfo } from './versions'
+import { getJarInfo, getJavaMajor } from './versions'
 import { loadServers, updateServer } from './servers'
+import { ensureJava } from './java'
 import type { InstallProgress } from './types'
 
 const USER_AGENT = 'Lodegate/0.0.1 (https://github.com/OVEERS/Lodegate)'
@@ -29,6 +30,7 @@ async function downloadFile(
 
   const source = Readable.fromWeb(res.body as never)
   source.on('data', (chunk: Buffer) => {
+
     received += chunk.length
     onProgress(received, total)
   })
@@ -50,6 +52,7 @@ export async function installServer(id: string): Promise<void> {
     send({ id, stage: 'preparing', received: 0, total: 0 })
     mkdirSync(server.dir, { recursive: true })
 
+    // 1. Ядро
     const jar = await getJarInfo(server.core, server.mcVersion)
     const target = join(server.dir, 'server.jar')
 
@@ -61,7 +64,13 @@ export async function installServer(id: string): Promise<void> {
       send({ id, stage: 'downloading', received, total })
     })
 
-    updateServer(id, { installed: true })
+
+    // 2. Java нужной версии (если уже есть, пропускается)
+    send({ id, stage: 'java', received: 0, total: 0 })
+    const major = await getJavaMajor(server.mcVersion)
+    const javaPath = await ensureJava(major)
+
+    updateServer(id, { installed: true, javaMajor: major, javaPath })
     send({ id, stage: 'done', received: 1, total: 1 })
   } catch (e) {
     const message = e instanceof Error ? e.message : String(e)

@@ -6,6 +6,10 @@ function formatMb(bytes: number): string {
   return (bytes / 1024 / 1024).toFixed(1) + ' MB'
 }
 
+function isBusy(p: InstallProgress | undefined): boolean {
+  return !!p && (p.stage === 'preparing' || p.stage === 'downloading' || p.stage === 'java')
+}
+
 export default function ServersPage() {
   const { t } = useI18n()
   const [servers, setServers] = useState<ServerConfig[]>([])
@@ -34,7 +38,6 @@ export default function ServersPage() {
       ...prev,
       [id]: { id, stage: 'preparing', received: 0, total: 0 }
     }))
-
     await window.api.install.start(id)
   }
 
@@ -44,15 +47,19 @@ export default function ServersPage() {
 
   function renderStatus(s: ServerConfig) {
     const p = progress[s.id]
-    const busy = p && (p.stage === 'preparing' || p.stage === 'downloading')
 
-    if (busy) {
+    if (p && isBusy(p)) {
       const percent = p.total > 0 ? Math.round((p.received / p.total) * 100) : 0
+      const indeterminate = p.stage === 'preparing' || p.stage === 'java'
       return (
         <div className="mt-3">
           <div className="flex justify-between text-xs text-muted">
             <span>
-              {p.stage === 'preparing' ? t('servers.preparing') : t('servers.downloading')}
+              {p.stage === 'preparing'
+                ? t('servers.preparing')
+                : p.stage === 'java'
+                  ? t('servers.installingJava')
+                  : t('servers.downloading')}
             </span>
             {p.stage === 'downloading' && (
               <span>
@@ -62,12 +69,11 @@ export default function ServersPage() {
           </div>
           <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-line">
             <div
-              className="h-full bg-teal transition-all"
-              style={{ width: p.stage === 'preparing' ? '5%' : percent + '%' }}
+              className={'h-full bg-teal transition-all ' + (indeterminate ? 'animate-pulse' : '')}
+              style={{ width: indeterminate ? '100%' : percent + '%' }}
             />
           </div>
         </div>
-
       )
     }
 
@@ -100,13 +106,11 @@ export default function ServersPage() {
         <div className="mt-8 flex flex-1 flex-col items-center justify-center rounded-xl border border-dashed border-line text-muted">
           <div className="text-base text-text">{t('servers.empty')}</div>
           <div className="mt-1 text-sm">{t('servers.emptyHint')}</div>
-
         </div>
       ) : (
         <div className="mt-8 flex flex-col gap-3">
           {servers.map((s) => {
-            const p = progress[s.id]
-            const busy = p && (p.stage === 'preparing' || p.stage === 'downloading')
+            const busy = isBusy(progress[s.id])
             return (
               <div key={s.id} className="rounded-xl border border-line bg-panel p-4">
                 <div className="flex items-center justify-between gap-4">
@@ -133,7 +137,6 @@ export default function ServersPage() {
                         onClick={() => install(s.id)}
                         className="rounded-lg bg-teal px-3 py-1.5 text-xs font-medium text-bg"
                       >
-
                         {t('servers.install')}
                       </button>
                     )}

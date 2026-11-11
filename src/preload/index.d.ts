@@ -17,11 +17,13 @@ declare global {
     maxRamMb: number
     createdAt: number
     installed: boolean
+    javaMajor?: number
+    javaPath?: string
   }
 
   interface InstallProgress {
     id: string
-    stage: 'preparing' | 'downloading' | 'done' | 'error'
+    stage: 'preparing' | 'downloading' | 'java' | 'done' | 'error'
     received: number
     total: number
     message?: string
