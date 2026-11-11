@@ -17,10 +17,19 @@ const api = {
     list: (core: string) => ipcRenderer.invoke('versions:list', core),
     jar: (core: string, version: string) => ipcRenderer.invoke('versions:jar', core, version),
     java: (version: string) => ipcRenderer.invoke('versions:java', version)
+  },
+  install: {
+    start: (id: string) => ipcRenderer.invoke('install:start', id),
+    onProgress: (callback: (p: unknown) => void) => {
+      const listener = (_e: unknown, p: unknown): void => callback(p)
+      ipcRenderer.on('install:progress', listener)
+      return () => ipcRenderer.removeListener('install:progress', listener)
+    }
   }
 }
 
 if (process.contextIsolated) {
+
   try {
     contextBridge.exposeInMainWorld('electron', electronAPI)
     contextBridge.exposeInMainWorld('api', api)

@@ -21,7 +21,6 @@ interface MojangManifest {
 let manifestCache: { at: number; data: McVersion[] } | null = null
 
 async function getMojangVersions(): Promise<McVersion[]> {
-  // Кеш на 10 минут, чтобы не дёргать API при каждом открытии мастера
   if (manifestCache && Date.now() - manifestCache.at < 10 * 60 * 1000) {
     return manifestCache.data
   }

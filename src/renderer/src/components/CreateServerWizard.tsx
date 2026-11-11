@@ -5,7 +5,7 @@ type Core = 'paper' | 'vanilla'
 
 interface Props {
   onClose: () => void
-  onCreated: () => void
+  onCreated: (id: string) => void
 }
 
 interface Info {
@@ -13,7 +13,6 @@ interface Info {
   java: number
 }
 
-// Убираем символы, которые нельзя использовать в имени папки Windows
 function safeName(name: string): string {
   return name.trim().replace(/[<>:"/\\|?*]/g, '_')
 }
@@ -37,12 +36,10 @@ export default function CreateServerWizard({ onClose, onCreated }: Props) {
   const [infoError, setInfoError] = useState(false)
   const [saving, setSaving] = useState(false)
 
-  // Папка по умолчанию
   useEffect(() => {
     window.api.servers.defaultDir().then(setParentDir)
   }, [])
 
-  // Список версий загружается заново при смене ядра
   const [reloadKey, setReloadKey] = useState(0)
   useEffect(() => {
     let cancelled = false
@@ -94,16 +91,15 @@ export default function CreateServerWizard({ onClose, onCreated }: Props) {
 
   async function create() {
     setSaving(true)
-    await window.api.servers.add({
+    const server = await window.api.servers.add({
       name: name.trim(),
-
       core,
       mcVersion: version,
       dir: finalDir,
       minRamMb: Math.min(2048, ramGb * 1024),
       maxRamMb: ramGb * 1024
     })
-    onCreated()
+    onCreated(server.id)
   }
 
   const coreCards: { id: Core; title: string; desc: string }[] = [

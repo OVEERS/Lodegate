@@ -11,4 +11,13 @@ export interface ServerConfig {
   minRamMb: number
   maxRamMb: number
   createdAt: number
+  installed: boolean
+}
+
+export interface InstallProgress {
+  id: string
+  stage: 'preparing' | 'downloading' | 'done' | 'error'
+  received: number
+  total: number
+  message?: string
 }

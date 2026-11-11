@@ -22,7 +22,13 @@ export const en: Dictionary = {
     create: 'Create server',
     empty: 'No servers yet',
     emptyHint: 'Click "Create server" to get started.',
-    remove: 'Remove'
+    remove: 'Remove',
+    install: 'Install',
+    installed: 'Installed',
+    notInstalled: 'Not installed',
+    preparing: 'Preparing…',
+    downloading: 'Downloading core',
+    installError: 'Install error'
   },
   wizard: {
     title: 'New server',
@@ -30,7 +36,6 @@ export const en: Dictionary = {
     namePlaceholder: 'My server',
     core: 'Core',
     corePaper: 'Fast, supports plugins. Recommended.',
-
     coreVanilla: 'Original Mojang server, no plugins.',
     version: 'Minecraft version',
     loadingVersions: 'Loading version list…',
@@ -50,7 +55,7 @@ export const en: Dictionary = {
     path: 'Path',
     loadingInfo: 'Getting data…',
     infoError: 'Could not get core information.',
-    note: 'For now only a record is created. File download comes in step 2.4.'
+    note: 'The core will be downloaded automatically after creation.'
   },
   settings: {
     title: 'Settings',

@@ -16,6 +16,15 @@ declare global {
     minRamMb: number
     maxRamMb: number
     createdAt: number
+    installed: boolean
+  }
+
+  interface InstallProgress {
+    id: string
+    stage: 'preparing' | 'downloading' | 'done' | 'error'
+    received: number
+    total: number
+    message?: string
   }
 
   interface Window {
@@ -27,7 +36,9 @@ declare global {
       }
       servers: {
         list: () => Promise<ServerConfig[]>
-        add: (data: Omit<ServerConfig, 'id' | 'createdAt'>) => Promise<ServerConfig>
+        add: (
+          data: Omit<ServerConfig, 'id' | 'createdAt' | 'installed'>
+        ) => Promise<ServerConfig>
         remove: (id: string) => Promise<ServerConfig[]>
         defaultDir: () => Promise<string>
         pickFolder: () => Promise<string | null>
@@ -39,6 +50,10 @@ declare global {
           version: string
         ) => Promise<{ url: string; fileName: string; build?: number }>
         java: (version: string) => Promise<number>
+      }
+      install: {
+        start: (id: string) => Promise<{ ok: boolean; error?: string }>
+        onProgress: (callback: (p: InstallProgress) => void) => () => void
       }
     }
   }
