@@ -65,7 +65,7 @@ export async function installServer(id: string): Promise<void> {
     })
 
 
-    // 2. Java нужной версии (если уже есть, пропускается)
+    // 2. Java нужной версии
     send({ id, stage: 'java', received: 0, total: 0 })
     const major = await getJavaMajor(server.mcVersion)
     const javaPath = await ensureJava(major)

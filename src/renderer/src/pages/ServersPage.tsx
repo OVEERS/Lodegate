@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useI18n } from '../i18n/I18nProvider'
 import CreateServerWizard from '../components/CreateServerWizard'
+import ServerView from './ServerView'
 
 function formatMb(bytes: number): string {
   return (bytes / 1024 / 1024).toFixed(1) + ' MB'
@@ -15,6 +16,7 @@ export default function ServersPage() {
   const [servers, setServers] = useState<ServerConfig[]>([])
   const [wizardOpen, setWizardOpen] = useState(false)
   const [progress, setProgress] = useState<Record<string, InstallProgress>>({})
+  const [openId, setOpenId] = useState<string | null>(null)
 
   async function reload() {
     setServers(await window.api.servers.list())
@@ -87,6 +89,11 @@ export default function ServersPage() {
     return null
   }
 
+  const opened = servers.find((s) => s.id === openId)
+  if (opened) {
+    return <ServerView server={opened} onBack={() => setOpenId(null)} />
+  }
+
   return (
     <div className="flex h-full flex-col p-8">
       <div className="flex items-start justify-between">
@@ -132,6 +139,14 @@ export default function ServersPage() {
                     <div className="mt-0.5 truncate text-xs text-muted">{s.dir}</div>
                   </div>
                   <div className="flex shrink-0 gap-2">
+                    {s.installed && (
+                      <button
+                        onClick={() => setOpenId(s.id)}
+                        className="rounded-lg bg-teal px-3 py-1.5 text-xs font-medium text-bg"
+                      >
+                        {t('console.open')}
+                      </button>
+                    )}
                     {!s.installed && !busy && (
                       <button
                         onClick={() => install(s.id)}

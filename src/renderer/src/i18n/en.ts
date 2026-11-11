@@ -67,5 +67,25 @@ export const en: Dictionary = {
     trayDesc: 'Servers and tunnels keep running in the background.',
     telemetry: 'Anonymous statistics',
     telemetryDesc: 'Off by default. Enable only if you want to help the project.'
-  }
+  },
+    console: {
+    open: 'Open',
+    back: 'Back',
+    start: 'Start',
+    stop: 'Stop',
+    status_stopped: 'Stopped',
+    status_installing: 'Installing',
+    status_starting: 'Starting',
+    status_running: 'Running',
+    status_stopping: 'Stopping',
+    title: 'Server console',
+    commandPlaceholder: 'Enter a command…',
+    send: 'Send',
+    eulaTitle: 'Minecraft EULA',
+    eulaText: 'To start the server you need to accept the Mojang license agreement.',
+    eulaLink: 'Read the agreement',
+    eulaCheck: 'I have read and accept the EULA',
+    eulaAccept: 'Accept and continue',
+    startError: 'Could not start'
+  },
 }

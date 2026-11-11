@@ -1,6 +1,8 @@
 import { ElectronAPI } from '@electron-toolkit/preload'
 
 declare global {
+  type ServerStatus = 'stopped' | 'installing' | 'starting' | 'running' | 'stopping'
+
   interface AppSettings {
     language: 'ru' | 'en'
     minimizeToTray: boolean
@@ -29,6 +31,7 @@ declare global {
     message?: string
   }
 
+
   interface Window {
     electron: ElectronAPI
     api: {
@@ -56,6 +59,17 @@ declare global {
       install: {
         start: (id: string) => Promise<{ ok: boolean; error?: string }>
         onProgress: (callback: (p: InstallProgress) => void) => () => void
+      }
+      runner: {
+        start: (id: string) => Promise<{ ok: boolean; error?: string }>
+        stop: (id: string) => Promise<void>
+
+        command: (id: string, command: string) => Promise<void>
+        state: (id: string) => Promise<{ status: ServerStatus; log: string[] }>
+        eulaStatus: (id: string) => Promise<boolean>
+        acceptEula: (id: string) => Promise<boolean>
+        onLog: (callback: (d: { id: string; line: string }) => void) => () => void
+        onStatus: (callback: (d: { id: string; status: ServerStatus }) => void) => () => void
       }
     }
   }

@@ -37,7 +37,6 @@ export const ru = {
     corePaper: 'Быстрое, поддерживает плагины. Рекомендуется.',
     coreVanilla: 'Оригинальный сервер Mojang, без плагинов.',
     version: 'Версия Minecraft',
-
     loadingVersions: 'Загрузка списка версий…',
     versionsError: 'Не удалось загрузить версии. Проверьте интернет.',
     retry: 'Повторить',
@@ -66,7 +65,27 @@ export const ru = {
     trayDesc: 'Серверы и туннели продолжат работать в фоне.',
     telemetry: 'Анонимная статистика',
     telemetryDesc: 'По умолчанию выключена. Включайте только если хотите помочь проекту.'
-  }
+  },
+    console: {
+    open: 'Открыть',
+    back: 'Назад',
+    start: 'Запустить',
+    stop: 'Остановить',
+    status_stopped: 'Остановлен',
+    status_installing: 'Установка',
+    status_starting: 'Запускается',
+    status_running: 'Работает',
+    status_stopping: 'Останавливается',
+    title: 'Консоль сервера',
+    commandPlaceholder: 'Введите команду…',
+    send: 'Отправить',
+    eulaTitle: 'Соглашение Minecraft EULA',
+    eulaText: 'Для запуска сервера нужно принять лицензионное соглашение Mojang.',
+    eulaLink: 'Прочитать соглашение',
+    eulaCheck: 'Я прочитал(а) и принимаю условия EULA',
+    eulaAccept: 'Принять и продолжить',
+    startError: 'Не удалось запустить'
+  },
 }
 
 export type Dictionary = typeof ru

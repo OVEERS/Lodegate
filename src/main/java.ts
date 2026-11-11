@@ -34,7 +34,7 @@ function javaRoot(major: number): string {
   return join(app.getPath('userData'), 'java', String(major))
 }
 
-// Ищем java.exe внутри папки (в архиве есть вложенная папка вида jdk-25+36)
+// Ищем java.exe внутри папки
 function findJavaExe(root: string): string | null {
   if (!existsSync(root)) return null
   for (const entry of readdirSync(root, { withFileTypes: true })) {
@@ -77,7 +77,7 @@ async function download(
   }
 }
 
-// Возвращает путь к java.exe, при необходимости скачивая JDK
+// Возвращает путь к java.exe
 export async function ensureJava(major: number): Promise<string> {
   const existing = getInstalledJava(major)
   if (existing) return existing
@@ -86,7 +86,7 @@ export async function ensureJava(major: number): Promise<string> {
     const root = javaRoot(major)
     mkdirSync(root, { recursive: true })
 
-    // Adoptium перенаправляет на актуальную сборку Temurin JDK для Windows x64
+    // Adoptium перенаправляет на актуальную сборку
     const url =
       `https://api.adoptium.net/v3/binary/latest/${major}/ga/windows/x64/jdk/hotspot/normal/eclipse`
     const zipPath = join(root, 'jdk.zip')
@@ -110,7 +110,6 @@ export async function ensureJava(major: number): Promise<string> {
     send({ major, stage: 'done', received: 1, total: 1 })
     return exe
   } catch (e) {
-    // Чистим недокачанное, чтобы следующая попытка началась с нуля
     rmSync(javaRoot(major), { recursive: true, force: true })
     const message = e instanceof Error ? e.message : String(e)
     send({ major, stage: 'error', received: 0, total: 0, message })

@@ -1,6 +1,12 @@
 import { contextBridge, ipcRenderer } from 'electron'
 import { electronAPI } from '@electron-toolkit/preload'
 
+function subscribe<T>(channel: string, callback: (data: T) => void): () => void {
+  const listener = (_e: unknown, data: T): void => callback(data)
+  ipcRenderer.on(channel, listener)
+  return () => ipcRenderer.removeListener(channel, listener)
+}
+
 const api = {
   settings: {
     get: () => ipcRenderer.invoke('settings:get'),
@@ -20,16 +26,22 @@ const api = {
   },
   install: {
     start: (id: string) => ipcRenderer.invoke('install:start', id),
-    onProgress: (callback: (p: unknown) => void) => {
-      const listener = (_e: unknown, p: unknown): void => callback(p)
-      ipcRenderer.on('install:progress', listener)
-      return () => ipcRenderer.removeListener('install:progress', listener)
-    }
+    onProgress: (cb: (p: never) => void) => subscribe('install:progress', cb)
+  },
+  runner: {
+    start: (id: string) => ipcRenderer.invoke('server:start', id),
+
+    stop: (id: string) => ipcRenderer.invoke('server:stop', id),
+    command: (id: string, command: string) => ipcRenderer.invoke('server:command', id, command),
+    state: (id: string) => ipcRenderer.invoke('server:state', id),
+    eulaStatus: (id: string) => ipcRenderer.invoke('server:eulaStatus', id),
+    acceptEula: (id: string) => ipcRenderer.invoke('server:acceptEula', id),
+    onLog: (cb: (d: never) => void) => subscribe('server:log', cb),
+    onStatus: (cb: (d: never) => void) => subscribe('server:status', cb)
   }
 }
 
 if (process.contextIsolated) {
-
   try {
     contextBridge.exposeInMainWorld('electron', electronAPI)
     contextBridge.exposeInMainWorld('api', api)
@@ -39,7 +51,6 @@ if (process.contextIsolated) {
 } else {
   // @ts-ignore (define in dts)
   window.electron = electronAPI
-
   // @ts-ignore (define in dts)
   window.api = api
 }

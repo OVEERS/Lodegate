@@ -11,7 +11,7 @@ export interface AppSettings {
 const defaults: AppSettings = {
   language: 'ru',
   minimizeToTray: true,
-  telemetry: false // в open-source телеметрия выключена по умолчанию
+  telemetry: false //телеметрия выключена по умолчанию
 }
 
 let cache: AppSettings | null = null
