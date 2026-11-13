@@ -39,6 +39,11 @@ const api = {
     onStatus: (cb: (d: never) => void) => subscribe('server:status', cb),
     onPlayers: (cb: (d: never) => void) => subscribe('server:players', cb),
     onStats: (cb: (d: never) => void) => subscribe('server:stats', cb)
+  },
+  props: {
+    exists: (id: string) => ipcRenderer.invoke('props:exists', id),
+    read: (id: string) => ipcRenderer.invoke('props:read', id),
+    write: (id: string, patch: object) => ipcRenderer.invoke('props:write', id, patch)
   }
 }
 

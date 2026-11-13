@@ -26,6 +26,10 @@ const running = new Map<string, Running>()
 const MAX_LOG_LINES = 1000
 const CORES = cpus().length
 
+export function isServerActive(id: string): boolean {
+  return running.has(id)
+}
+
 function sendAll(channel: string, payload: unknown): void {
   for (const win of BrowserWindow.getAllWindows()) {
     win.webContents.send(channel, payload)

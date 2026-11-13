@@ -82,6 +82,11 @@ declare global {
         onPlayers: (callback: (d: { id: string; players: string[] }) => void) => () => void
         onStats: (callback: (d: { id: string } & ServerStats) => void) => () => void
       }
+      props: {
+        exists: (id: string) => Promise<boolean>
+        read: (id: string) => Promise<{ exists: boolean; values: Record<string, string> }>
+        write: (id: string, patch: Record<string, string>) => Promise<boolean>
+      }
     }
   }
 }

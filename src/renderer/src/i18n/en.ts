@@ -101,6 +101,21 @@ export const en: Dictionary = {
     list: 'Player list',
     plugins: 'Plugins'
   },
+      props: {
+    save: 'Save settings',
+    saved: 'Saved',
+    saveError: 'Could not save. Stop the server and try again.',
+    changed: 'Fields changed',
+    restartHint: 'Stop the server to edit its settings.',
+    onlineWarn:
+      'online-mode is off: anyone can join under any name, including an operator name. Use a whitelist.',
+    advanced: 'Advanced',
+    blockedTitle: 'Settings are not available yet',
+    blockedText:
+      'Install and start the server. After it has fully loaded, stop it to unlock these settings.',
+    ok: 'Got it',
+    loading: 'Loading…'
+  },
   settings: {
     title: 'Settings',
     description: 'Language, notifications and app behavior.',

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useI18n } from '../i18n/I18nProvider'
+import ServerSettingsTab from './ServerSettingsTab'
 
 interface Props {
   server: ServerConfig
@@ -30,7 +31,6 @@ const statusColor: Record<ServerStatus, string> = {
 function StatCard({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-xl border border-line bg-panel p-4">
-
       <div className="text-xs text-muted">{label}</div>
       <div className="mt-2 text-xl font-semibold">{value}</div>
     </div>
@@ -49,6 +49,8 @@ export default function ServerView({ server, onBack }: Props) {
   const [error, setError] = useState('')
   const [eulaOpen, setEulaOpen] = useState(false)
   const [eulaChecked, setEulaChecked] = useState(false)
+  const [propsExists, setPropsExists] = useState(false)
+  const [blockedOpen, setBlockedOpen] = useState(false)
   const logRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -63,12 +65,10 @@ export default function ServerView({ server, onBack }: Props) {
     const offLog = window.api.runner.onLog((d) => {
       if (d.id !== server.id) return
       setLines((prev) => [...prev.slice(-999), d.line])
-
     })
     const offStatus = window.api.runner.onStatus((d) => {
       if (d.id !== server.id) return
       setStatus(d.status)
-      // После запуска файл server.properties уже создан, перечитываем лимит игроков
       if (d.status === 'running') {
         window.api.runner.state(server.id).then((s) => setMaxPlayers(s.maxPlayers))
       }
@@ -87,16 +87,42 @@ export default function ServerView({ server, onBack }: Props) {
     }
   }, [server.id])
 
+  // Проверяем, создан ли server.properties (от этого зависит замок на вкладке)
+  useEffect(() => {
+    let active = true
+    window.api.props.exists(server.id).then((exists) => {
+      if (active) setPropsExists(exists)
+    })
+    return () => {
+      active = false
+    }
+  }, [server.id, status])
+
   useEffect(() => {
     const el = logRef.current
     if (el) el.scrollTop = el.scrollHeight
   }, [lines, tab])
 
+  async function selectTab(id: Tab) {
+    if (id === 'settings') {
+      const [exists, state] = await Promise.all([
+        window.api.props.exists(server.id),
+        window.api.runner.state(server.id)
+      ])
+      setPropsExists(exists)
+      setStatus(state.status)
+      if (!server.installed || state.status !== 'stopped' || !exists) {
+        setBlockedOpen(true)
+        return
+      }
+    }
+    setTab(id)
+  }
+
   async function start() {
     setError('')
     const accepted = await window.api.runner.eulaStatus(server.id)
     if (!accepted) {
-
       setEulaChecked(false)
       setEulaOpen(true)
       return
@@ -129,7 +155,6 @@ export default function ServerView({ server, onBack }: Props) {
     { label: t('overview.night'), cmd: 'time set night' },
     { label: t('overview.list'), cmd: 'list' }
   ]
-
   if (server.core === 'paper') quick.push({ label: t('overview.plugins'), cmd: 'plugins' })
 
   const ramText = live
@@ -162,19 +187,17 @@ export default function ServerView({ server, onBack }: Props) {
             onClick={() => window.api.runner.stop(server.id)}
             disabled={!canStop}
             className="rounded-lg border border-line px-4 py-2 text-sm text-text disabled:opacity-40"
-
           >
             {t('console.stop')}
           </button>
         </div>
       </div>
 
-      {/* Панель вкладок */}
       <div className="mt-6 flex gap-1 overflow-x-auto border-b border-line">
         {TABS.map((id) => (
           <button
             key={id}
-            onClick={() => setTab(id)}
+            onClick={() => selectTab(id)}
             className={
               'whitespace-nowrap border-b-2 px-3 py-2 text-sm transition-colors ' +
               (tab === id
@@ -182,6 +205,10 @@ export default function ServerView({ server, onBack }: Props) {
                 : 'border-transparent text-muted hover:text-text')
             }
           >
+            {id === 'settings' &&
+            (!server.installed || status !== 'stopped' || !propsExists)
+              ? '🔒 '
+              : ''}
             {t('tabs.' + id)}
           </button>
         ))}
@@ -193,10 +220,15 @@ export default function ServerView({ server, onBack }: Props) {
         </div>
       )}
 
-      {tab !== 'overview' && (
+      {tab !== 'overview' && tab !== 'settings' && (
         <div className="mt-6 flex flex-1 items-center justify-center rounded-xl border border-dashed border-line text-sm text-muted">
-
           {t('tabs.soon')}
+        </div>
+      )}
+
+      {tab === 'settings' && (
+        <div className="mt-6 flex min-h-0 flex-1 flex-col">
+          <ServerSettingsTab server={server} status={status} />
         </div>
       )}
 
@@ -228,7 +260,6 @@ export default function ServerView({ server, onBack }: Props) {
                       ? 'text-amber'
                       : /ERROR|Exception/.test(line)
                         ? 'text-red-400'
-
                         : 'text-text'
                   }
                 >
@@ -261,11 +292,27 @@ export default function ServerView({ server, onBack }: Props) {
                   onClick={() => sendCommand(q.cmd)}
                   disabled={status !== 'running'}
                   className="rounded-full border border-line bg-panel-2 px-3 py-1 text-xs hover:border-teal disabled:opacity-40"
-
                 >
                   {q.label}
                 </button>
               ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {blockedOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-6">
+          <div className="w-full max-w-md rounded-2xl border border-line bg-panel p-6">
+            <h2 className="text-lg font-semibold">{t('props.blockedTitle')}</h2>
+            <p className="mt-2 text-sm text-muted">{t('props.blockedText')}</p>
+            <div className="mt-6 flex justify-end">
+              <button
+                onClick={() => setBlockedOpen(false)}
+                className="rounded-lg bg-teal px-4 py-2 text-sm font-medium text-bg"
+              >
+                {t('props.ok')}
+              </button>
             </div>
           </div>
         </div>
@@ -294,7 +341,6 @@ export default function ServerView({ server, onBack }: Props) {
               {t('console.eulaCheck')}
             </label>
             <div className="mt-6 flex justify-end gap-2">
-
               <button
                 onClick={() => setEulaOpen(false)}
                 className="rounded-lg border border-line px-4 py-2 text-sm text-muted"
