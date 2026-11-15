@@ -101,7 +101,7 @@ export const en: Dictionary = {
     list: 'Player list',
     plugins: 'Plugins'
   },
-      props: {
+  props: {
     save: 'Save settings',
     saved: 'Saved',
     saveError: 'Could not save. Stop the server and try again.',
@@ -115,6 +115,37 @@ export const en: Dictionary = {
       'Install and start the server. After it has fully loaded, stop it to unlock these settings.',
     ok: 'Got it',
     loading: 'Loading…'
+  },
+    files: {
+    refresh: 'Refresh',
+    newFile: '+ File',
+    newFolder: '+ Folder',
+    remove: 'Delete',
+    loading: 'Loading…',
+    empty: 'Folder is empty',
+    pick: 'Select a file on the left to open it.',
+    save: 'Save',
+    saved: 'Saved',
+    saveError: 'Could not save the file.',
+    unsavedTitle: 'Unsaved changes',
+    unsavedText: 'Save changes to the current file before switching?',
+    discard: "Don't save",
+    saveAndGo: 'Save and switch',
+    stay: 'Stay',
+    binary: 'This is not a text file and cannot be opened.',
+    tooLarge: 'The file is too large (over 2 MB).',
+    readError: 'Could not read the file.',
+    activeHint: 'The server is running and may overwrite its own files. Edit with care.',
+    activeError: 'This action is unavailable while the server is running.',
+    newFileTitle: 'New file',
+    newFolderTitle: 'New folder',
+    name: 'Name',
+    create: 'Create',
+    invalidName: 'Invalid name.',
+    exists: 'A file or folder with this name already exists.',
+    deleteTitle: 'Delete?',
+    deleteText: 'Will be moved to the Windows Recycle Bin:',
+    rootError: 'Could not open the server folder.'
   },
   settings: {
     title: 'Settings',

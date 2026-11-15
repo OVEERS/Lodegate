@@ -9,6 +9,7 @@ import { registerInstallerIpc } from './installer'
 import { registerJavaIpc } from './java'
 import { registerRunnerIpc } from './runner'
 import { registerPropertiesIpc } from './properties'
+import { registerFilesIpc } from './files'
 
 
 function createWindow(): void {
@@ -56,6 +57,7 @@ app.whenReady().then(() => {
   registerJavaIpc()
   registerRunnerIpc()
   registerPropertiesIpc()
+    registerFilesIpc()
   // Set app user model id for windows
   electronApp.setAppUserModelId('com.electron')
 

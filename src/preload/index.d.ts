@@ -36,6 +36,17 @@ declare global {
     cpu: number
   }
 
+  interface FileEntry {
+    name: string
+    isDir: boolean
+    size: number
+  }
+
+  interface FileOpResult {
+    ok: boolean
+    error?: string
+  }
+
   interface Window {
     electron: ElectronAPI
     api: {
@@ -86,6 +97,27 @@ declare global {
         exists: (id: string) => Promise<boolean>
         read: (id: string) => Promise<{ exists: boolean; values: Record<string, string> }>
         write: (id: string, patch: Record<string, string>) => Promise<boolean>
+      }
+      files: {
+        list: (
+          id: string,
+          rel: string
+        ) => Promise<{ ok: boolean; error?: string; entries: FileEntry[] }>
+                read: (
+          id: string,
+          rel: string,
+          mode?: 'normal' | 'force'
+        ) => Promise<{
+          ok: boolean
+          error?: string
+          kind?: 'text' | 'forced' | 'image'
+          content?: string
+          dataUrl?: string
+          truncated?: boolean
+        }>
+        write: (id: string, rel: string, content: string) => Promise<FileOpResult>
+        create: (id: string, rel: string, isDir: boolean) => Promise<FileOpResult>
+        remove: (id: string, rel: string) => Promise<FileOpResult>
       }
     }
   }
