@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from 'react'
 import { useI18n } from '../i18n/I18nProvider'
 import ServerSettingsTab from './ServerSettingsTab'
 import ServerFilesTab from './ServerFilesTab'
+import ServerLaunchTab from './ServerLaunchTab'
+import ErrorBoundary from '../components/ErrorBoundary'
 
 interface Props {
   server: ServerConfig
@@ -221,7 +223,7 @@ export default function ServerView({ server, onBack }: Props) {
         </div>
       )}
 
-      {tab !== 'overview' && tab !== 'settings' && tab !== 'files' && (
+      {tab !== 'overview' && tab !== 'settings' && tab !== 'files' && tab !== 'launch' && (
         <div className="mt-6 flex flex-1 items-center justify-center rounded-xl border border-dashed border-line text-sm text-muted">
           {t('tabs.soon')}
         </div>
@@ -238,7 +240,15 @@ export default function ServerView({ server, onBack }: Props) {
           <ServerFilesTab server={server} status={status} />
         </div>
       )}
-      
+    
+      {tab === 'launch' && (
+        <div className="mt-6 flex min-h-0 flex-1 flex-col">
+          <ErrorBoundary key={server.id}>
+            <ServerLaunchTab server={server} status={status} />
+          </ErrorBoundary>
+        </div>
+      )}
+    
       {tab === 'overview' && (
         <div className="mt-6 flex min-h-0 flex-1 flex-col gap-4">
           <div className="grid grid-cols-4 gap-3">

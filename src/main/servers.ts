@@ -2,6 +2,7 @@ import { app, ipcMain, dialog, BrowserWindow } from 'electron'
 import { join } from 'path'
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs'
 import { randomUUID } from 'crypto'
+import { sanitizeLaunch } from './launch'
 import type { ServerConfig } from './types'
 
 function serversPath(): string {
@@ -13,7 +14,11 @@ export function loadServers(): ServerConfig[] {
     const file = serversPath()
     if (existsSync(file)) {
       const list = JSON.parse(readFileSync(file, 'utf-8')) as ServerConfig[]
-      return list.map((s) => ({ ...s, installed: s.installed ?? false }))
+      return list.map((s) => ({
+        ...s,
+        installed: s.installed ?? false,
+        launch: sanitizeLaunch(s.launch)
+      }))
     }
   } catch (e) {
     console.error('Не удалось прочитать servers.json', e)
@@ -36,13 +41,14 @@ export function registerServersIpc(): void {
 
   ipcMain.handle(
     'servers:add',
-    (_event, data: Omit<ServerConfig, 'id' | 'createdAt' | 'installed'>) => {
+    (_event, data: Omit<ServerConfig, 'id' | 'createdAt' | 'installed' | 'launch'>) => {
       const list = loadServers()
       const server: ServerConfig = {
         ...data,
         id: randomUUID(),
         createdAt: Date.now(),
-        installed: false
+        installed: false,
+        launch: sanitizeLaunch(undefined)
       }
       list.push(server)
       saveServers(list)

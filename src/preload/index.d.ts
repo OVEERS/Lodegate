@@ -9,6 +9,16 @@ declare global {
     telemetry: boolean
   }
 
+  interface LaunchSettings {
+    aikar: boolean
+    zgc: boolean
+    jmx: boolean
+    javaMajor: number | null
+    jvmArgs: string
+    serverArgs: string
+    autoRestart: boolean
+  }
+
   interface ServerConfig {
     id: string
     name: string
@@ -20,7 +30,9 @@ declare global {
     createdAt: number
     installed: boolean
     javaMajor?: number
+
     javaPath?: string
+    launch: LaunchSettings
   }
 
   interface InstallProgress {
@@ -51,13 +63,14 @@ declare global {
     electron: ElectronAPI
     api: {
       settings: {
+
         get: () => Promise<AppSettings>
         set: (patch: Partial<AppSettings>) => Promise<AppSettings>
       }
       servers: {
         list: () => Promise<ServerConfig[]>
         add: (
-          data: Omit<ServerConfig, 'id' | 'createdAt' | 'installed'>
+          data: Omit<ServerConfig, 'id' | 'createdAt' | 'installed' | 'launch'>
         ) => Promise<ServerConfig>
         remove: (id: string) => Promise<ServerConfig[]>
         defaultDir: () => Promise<string>
@@ -83,6 +96,7 @@ declare global {
           status: ServerStatus
           log: string[]
           players: string[]
+
           stats: ServerStats
           maxPlayers: number
         }>
@@ -103,7 +117,7 @@ declare global {
           id: string,
           rel: string
         ) => Promise<{ ok: boolean; error?: string; entries: FileEntry[] }>
-                read: (
+        read: (
           id: string,
           rel: string,
           mode?: 'normal' | 'force'
@@ -115,9 +129,25 @@ declare global {
           dataUrl?: string
           truncated?: boolean
         }>
+
         write: (id: string, rel: string, content: string) => Promise<FileOpResult>
         create: (id: string, rel: string, isDir: boolean) => Promise<FileOpResult>
         remove: (id: string, rel: string) => Promise<FileOpResult>
+      }
+      launch: {
+        info: () => Promise<{ javas: number[]; totalRamMb: number }>
+        preview: (
+          id: string,
+          minRamMb: number,
+          maxRamMb: number,
+          launch: LaunchSettings
+        ) => Promise<string>
+        save: (
+          id: string,
+          minRamMb: number,
+          maxRamMb: number,
+          launch: LaunchSettings
+        ) => Promise<FileOpResult>
       }
     }
   }

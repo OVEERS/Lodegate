@@ -30,7 +30,6 @@ const api = {
   },
   runner: {
     start: (id: string) => ipcRenderer.invoke('server:start', id),
-
     stop: (id: string) => ipcRenderer.invoke('server:stop', id),
     command: (id: string, command: string) => ipcRenderer.invoke('server:command', id, command),
     state: (id: string) => ipcRenderer.invoke('server:state', id),
@@ -55,6 +54,13 @@ const api = {
     create: (id: string, rel: string, isDir: boolean) =>
       ipcRenderer.invoke('files:create', id, rel, isDir),
     remove: (id: string, rel: string) => ipcRenderer.invoke('files:remove', id, rel)
+  },
+  launch: {
+    info: () => ipcRenderer.invoke('launch:info'),
+    preview: (id: string, minRamMb: number, maxRamMb: number, launch: object) =>
+      ipcRenderer.invoke('launch:preview', id, minRamMb, maxRamMb, launch),
+    save: (id: string, minRamMb: number, maxRamMb: number, launch: object) =>
+      ipcRenderer.invoke('launch:save', id, minRamMb, maxRamMb, launch)
   }
 }
 
@@ -64,7 +70,6 @@ if (process.contextIsolated) {
     contextBridge.exposeInMainWorld('api', api)
   } catch (error) {
     console.error(error)
-
   }
 } else {
   // @ts-ignore (define in dts)

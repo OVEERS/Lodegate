@@ -128,3 +128,13 @@ export function registerJavaIpc(): void {
   })
   ipcMain.handle('java:status', (_e, major: number) => getInstalledJava(major))
 }
+
+export function listInstalledJava(): number[] {
+  const dir = join(app.getPath('userData'), 'java')
+  if (!existsSync(dir)) return []
+  return readdirSync(dir, { withFileTypes: true })
+    .filter((d) => d.isDirectory() && /^\d+$/.test(d.name))
+    .map((d) => Number(d.name))
+    .filter((major) => getInstalledJava(major) !== null)
+    .sort((a, b) => a - b)
+}
